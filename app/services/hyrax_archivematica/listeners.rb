@@ -1,4 +1,4 @@
-module Archivematica
+module HyraxArchivematica
   # @note
   #    Did you encounter an exception similar to the following:
   #
@@ -9,6 +9,6 @@ module Archivematica
   module Listeners
     extend ActiveSupport::Autoload
 
-    autoload :ArchivematicaListener
+    autoload :ArchiveListener
  end
 end

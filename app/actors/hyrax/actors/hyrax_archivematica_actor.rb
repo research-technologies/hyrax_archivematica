@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+require_dependency "hyrax_archivematica/app/jobs/start_archive_job"
 
 module Hyrax
   module Actors
@@ -8,7 +10,7 @@ module Hyrax
       def create(env)
         # If uploaded_files is empty we assume this is a metadata only create and no file attach or delete messages will be published
         # So we will trigger archiving here and things like significant changes and whether to go ahead can be checked by the job
-        StartArchivematicaArchiveJob.perform_later(env.curation_concern) if env.attributes[:uploaded_files].empty?
+        StartArchiveJob.perform_later(env.curation_concern) if env.attributes[:uploaded_files].empty?
         next_actor.create(env)
       end
 
@@ -17,7 +19,7 @@ module Hyrax
       def update(env)
         # If uploaded_files is empty we assume this is a metadata only update and no file attach or delete messages will be published
         # So we will trigger archiving here and things like significant changes and whether to go ahead can be checked by the job
-        StartArchivematicaArchiveJob.perform_later(env.curation_concern) if env.attributes[:uploaded_files].empty?
+        StartArchiveJob.perform_later(env.curation_concern) if env.attributes[:uploaded_files].empty?
         next_actor.update(env)
       end
 

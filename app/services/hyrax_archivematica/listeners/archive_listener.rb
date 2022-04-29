@@ -1,11 +1,12 @@
 # frozen_string_literal: true
+require_dependency "hyrax_archivematica/app/jobs/start_archive_job"
 
-module Archivematica
+module HyraxArchivematica
   module Listeners
     ##
     # Listens for events related to Hydra Works FileSets and initiates process of archiving to archivematica
-    class ArchivematicaListener
-
+    class ArchiveListener
+ 
       # @param event [Dry::Event]
       def on_object_metadata_updated(event)
         # Don't trigger archive if file_set metadata is updated? 
@@ -18,13 +19,13 @@ module Archivematica
         # if there is change then quit because file attach should catch the change when done
         # if there is no change then we _could_ have an update to significant metadata only so start the archivematicaJob from there
 
-#        StartArchivematicaArchiveJob.perform_later(event[:object], event[:user])
+#        StartArchiveJob.perform_later(event[:object], event[:user])
 
       end
 
       def on_object_archive_prepared(event)
         STDERR.puts "############# OBJECT_ARCHIVE_PREPARED: #{event[:object]}"
-        StartArchivematicaArchiveJob.perform_later(event[:object]) if Sidekiq.server?
+        StartArchiveJob.perform_later(event[:object]) if Sidekiq.server?
       end
 
       def on_object_deposited(event)
@@ -33,7 +34,7 @@ module Archivematica
         # to be triggered for new and update
         return if event[:object].file_set?
         STDERR.puts "############# OBJECT_DEPOSITED"
-#        StartArchivematicaArchiveJob.perform_later(event[:object], event[:user])
+#        StartArchiveJob.perform_later(event[:object], event[:user])
       end
 
       ##
@@ -41,7 +42,7 @@ module Archivematica
       def on_file_set_attached(event)
         STDERR.puts "################ FILE_ATTACHED"
          # file set attachement event appears to be repeated a lot so can't really trust this to be sarting jobs with
-#        StartArchivematicaArchiveJob.perform_later(event[:file_set].parent, event[:user])
+#        StartArchiveJob.perform_later(event[:file_set].parent, event[:user])
       end
 
       def on_object_deleted(event)
@@ -56,12 +57,12 @@ module Archivematica
            # We are very very likely to have no work, so all we can send is the file_set_id of the deleted file
            # with this we can start the job and that will check to see if there is an archive_record with the same 
            # file_set_id and from that it will get the work
-           StartArchivematicaArchiveJob.perform_later(nil,event[:id]) 
+           StartArchiveJob.perform_later(nil,event[:id]) 
         else
            # Not sure we get here and if we do, not sure we really want to start an archive job
            # That would archive a work that has just been deleted... which defeats the object 
            # of an archive a wee bit
-           # StartArchivematicaArchiveJob.perform_later(work) 
+           # StartArchiveJob.perform_later(work) 
         end
       end
 

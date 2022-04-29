@@ -28,8 +28,9 @@ HyraxArchivematica.config do |config|
   ]
 end
 
+require 'hyrax_archivematica/app/services/hyrax_archivematica/listeners/archive_listener'
 # register our listener
-Hyrax.publisher.subscribe(Archivematica::Listeners::ArchivematicaListener.new)
+Hyrax.publisher.subscribe(HyraxArchivematica::Listeners::ArchiveListener.new)
 
 # Respond to "special" callback by publishing the message that _all_ files have been attached
 Hyrax.config.callback.set(:after_attach_filesets, warn: false) do |work, user|
@@ -43,6 +44,7 @@ end
 # whether the metadata change trigger the significant metadata conditions for an AIP update
 # We insert BEFORE the CreateWithFilesActor (in this case swapped with CreateWithFilesOrderedMembersActor) has deleted the uploaded files
 
+require 'hyrax_archivematica/app/actors/hyrax/actors/hyrax_archivematica_actor'
 Hyrax.config do | config |
   Hyrax::CurationConcern.actor_factory.insert_before Hyrax::Actors::CreateWithFilesActor, Hyrax::Actors::HyraxArchivematicaActor
 end
