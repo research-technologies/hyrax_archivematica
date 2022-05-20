@@ -1,0 +1,27 @@
+module HyraxArchivematica
+  class Engine < Rails::Engine
+    isolate_namespace HyraxArchivematica
+
+    initializer :append_migrations do |app|
+      if !app.root.to_s.match(root.to_s) && app.root.join('db/migrate').children.none? { |path| path.fnmatch?("*.hyrax_archivematica.rb") }
+        config.paths["db/migrate"].expanded.each do |expanded_path|
+          app.config.paths["db/migrate"] << expanded_path
+        end
+      end
+    end
+
+    config.after_initialize do
+      my_engine_root = HyraxArchivematica::Engine.root.to_s
+      paths = ActionController::Base.view_paths.collect(&:to_s)
+      hyrax_path = paths.detect { |path| path.match(/\/hyrax-[\d\.]+.*/) }
+      paths = if hyrax_path
+                paths.insert(paths.index(hyrax_path), my_engine_root + '/app/views')
+              else
+                paths.insert(0, my_engine_root + '/app/views')
+              end
+      ActionController::Base.view_paths = paths
+    end
+
+  end
+
+end

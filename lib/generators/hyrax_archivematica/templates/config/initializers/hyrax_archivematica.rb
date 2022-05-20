@@ -18,7 +18,7 @@ HyraxArchivematica.config do |config|
   config.am_storage_service_port = 8000
   # Available from archivemarica dashboard user API_KEY on user account edit page 
   config.am_api_key = ''
-  # Archviematica Transfer source UUID available {am_protocol}://{am_host}:{am_storage_service_port}/locations/
+  # Archivematica Transfer source UUID available {am_protocol}://{am_host}:{am_storage_service_port}/locations/
   config.am_transfer_source_uuid = ''
   config.am_storage_service_api_key = ''
 

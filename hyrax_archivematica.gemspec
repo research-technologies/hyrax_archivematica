@@ -1,23 +1,18 @@
-lib = File.expand_path('../lib', __FILE__)
-
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-
-require 'hyrax_archivematica/version'
-
 Gem::Specification.new do |s|
-  s.name          = 'hyrax_archivematica'
-  s.version       = HyraxArchivematica::VERSION
-  s.summary       = "Integration for Hyrax/Archivematica"
-  s.description   = "A gem that will build bags and send them to archviematica for preservartion and record the AM UUID"
-  s.authors       = ["Rory McNicholl"]
-  s.email         = 'rory.mcncholl@london.ac.uk'
-  s.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
-  s.test_files    = s.files.grep(%r{^(test|spec|features)/})
-  s.require_paths = ['lib']
-#  s.homepage     =
-#    'https://rubygems.org/gems/hyrax-archivematica'
-  s.licenses = ["Apache-2.0".freeze]
+  s.name        = 'hyrax_archivematica'
+  s.version     = '0.0.1'
+  s.summary     = "Hyrax / Archivematica integration gem"
+  s.description = "Hyrax / Archivematica integration gem. Bags up hyrax works and transfers them to archivematica, then manages rtansfer and ingest of item, keeps a dashboard showing progress and finally records the AIP UUID"
+  s.authors     = ["Rory McNicholl"]
+  s.email       = 'rory.mcnicholl@london.ac.uk'
+  s.files       = ["lib/hyrax_archivematica.rb", "lib/hyrax_archivematica/engine.rb", "config/routes.rb", "app/models/hyrax_archivematica/archive_record.rb", "app/controllers/hyrax_archivematica/application_controller.rb", "app/controllers/hyrax_archivematica/archives_controller.rb", "app/workflows/archive_workflow.rb", "db/migrate/20220412100839_create_archive_records.hyrax_archivematica.rb", "20220415015621_add_file_set_ids_to_archive_records.hyrax_archivematica.rb", "20220420131810_add_job_id_to_archive_records.hyrax_archivematica.rb", "20220511215353_add_bag_path_to_archive_record.hyrax_archivematica.rb"]
+  s.homepage    =
+    'https://rubygems.org/gems/hyrax_archivematica'
+  s.license       = 'Apache2.0'
 
-
+  if s.respond_to? :add_runtime_dependency then
+    s.add_runtime_dependency(%q<rails>.freeze, [">= 5.1.6"])
+  else
+    s.add_dependency(%q<rails>.freeze, [">= 5.1.6"])
+  end
 end
-

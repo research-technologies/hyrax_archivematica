@@ -1,9 +1,11 @@
+require 'active_support/all'
+
 module HyraxArchivematica
 
   class << self
     # TODO: remove collection_field_mapping when releasing v2
     mattr_accessor :bagit_export_path, :transfer_path, 
-                   :significant_metadata, :am_ssh_key, 
+                   :significant_metadata, :am_ssh_key, :am_ssh_user, 
                    :am_host, :am_user, :am_protocol, 
                    :am_storage_service_port, :am_api_key,
                    :am_transfer_source_uuid, :am_storage_service_api_key ,
@@ -23,6 +25,7 @@ module HyraxArchivematica
     self.bagit_export_path = 'tmp/bagit_export'
     self.transfer_path = 'tmp/am_transfer'
     self.significant_metadata = %i[ title creator ]
+
   end
 
   # this function maps the vars from your app into your engine
@@ -30,4 +33,25 @@ module HyraxArchivematica
     yield self if block
   end
 
+
+  module Constants
+    # Status constants
+    STATUS_ARCHIVE_INITIALISED = 'archive_initialised'.freeze
+    STATUS_BAG_CREATED = 'bag_created'.freeze
+    STATUS_TRANSFER_VERIFIED = 'transferred_to_transfer_source'.freeze
+    STATUS_TRANSFER_NOT_VERIFIED = 'transfer_to_transfer_source_failed'.freeze
+    STATUS_AM_TRANSFER_STARTED = 'am_transfer_started'.freeze
+    STATUS_AM_TRANSFER_FAILED = 'am_transfer_failed'.freeze
+    STATUS_AM_TRANSFER_SUCCESS = 'am_transfer_succeeded'.freeze
+    STATUS_AM_INGEST_STARTED = 'am_ingest_started'.freeze
+    STATUS_AM_INGEST_FAILED = 'am_ingest_failed'.freeze
+    STATUS_AM_INGEST_SUCCESS = 'am_ingest_succeeded'.freeze
+    STATUS_ARCHIVE_COMPLETE = 'archive_complete'.freeze
+    STATUS_ERROR = 'error'.freeze # catchall error status
+  end
+
+
 end
+
+# Require our engine
+require "hyrax_archivematica/engine"

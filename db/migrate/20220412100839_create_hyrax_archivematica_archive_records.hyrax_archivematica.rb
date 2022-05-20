@@ -1,6 +1,6 @@
-class CreateArchiveRecords < ActiveRecord::Migration[5.2]
+class CreateHyraxArchivematicaArchiveRecords < ActiveRecord::Migration[5.2]
   def change
-    create_table :archive_records do |t|
+    create_table :hyrax_archivematica_archive_records do |t|
       t.string :work_id
       t.string :aip_uuid
       t.string :sip_uuid
