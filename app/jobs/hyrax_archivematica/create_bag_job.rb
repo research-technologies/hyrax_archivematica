@@ -1,14 +1,14 @@
 # frozen_string_literal: true
-#require_dependency "hyrax_archivematica/app/jobs/hyrax_archivematica_job_behaviour"
 
 module HyraxArchivematica
   # Assesses a work for readiness and changes before outputing 
   # NEW_AIP or UPDATE_AIP (or stops the workflow) accordingly
-  class CreateBagJob < Gush::Job
-     include HyraxArchivematica::HyraxArchivematicaJobBehaviour
- 
+  class CreateBagJob < BaseJob
+    include HyraxArchivematica::ArchiveRecordBehaviour
+
     def perform
  
+      @user = User.where(email: params[:user][:id]).first
       prev_job_output = payloads.first[:output]
       @archive_record = ArchiveRecord.find(prev_job_output[:archive_record_id]) 
       @work = ActiveFedora::Base.find(@archive_record.work_id) 
@@ -26,14 +26,26 @@ module HyraxArchivematica
   
     private
   
+      def update_aip
+        STDERR.puts "#################### Change to metadata only detected : attempt to update AIP ?? #################"
+#        write_files
+#        write_metadata
+#        build_bag
+#        @bag_zip = build_zip
+#        @archive_record.update_attributes({bag_path: @bag_zip,
+#                                           bag_hash: calculate_bag_hash, 
+#                                           archive_status: HyraxArchivematica::Constants::STATUS_BAG_CREATED})
+#        cleanup_pre_bag_work_path
+#        cleanup_transfer_work_path
+      end
+
       def create_bag
-        STDERR.puts "#################### Change to file detected (maybe metadata too) : new AIP will be created #################"
         write_files
         write_metadata
         build_bag
         @bag_zip = build_zip
         @archive_record.update_attributes({bag_path: @bag_zip,
-                                           bag_hash: bag_hash, 
+                                           bag_hash: calculate_bag_hash, 
                                            archive_status: HyraxArchivematica::Constants::STATUS_BAG_CREATED})
         cleanup_pre_bag_work_path
         cleanup_transfer_work_path
@@ -46,7 +58,7 @@ module HyraxArchivematica
           FileUtils.mkdir_p(path)
           file = filename(fs)
           require 'open-uri'
-          io = open(fs.original_file.uri)
+          io = URI.open(fs.original_file.uri)
           next if file.blank?
           File.open(File.join(path, file), 'wb') do |f|
             f.write(io.read)
@@ -103,7 +115,7 @@ module HyraxArchivematica
         @bag_zip_path ||= "#{transfer_work_path}_#{Time.now.to_i}.zip"
       end
 
-      def bag_hash
+      def calculate_bag_hash
         @bag_hash ||= calculate_md5 @bag_zip
       end
   
@@ -126,18 +138,15 @@ module HyraxArchivematica
       end
   
       def read_oai_dc_xml
-        u = URI(oai_dc_xml_url)
-        Net::HTTP.start(u.host, u.port, :use_ssl => u.scheme == 'https', :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
-          request = Net::HTTP::Get.new(u)
-          response = http.request(request)
-          response.read_body
-        end
+        @current_ability = ::Ability.new(@user)
+        presenter = Hyrax::PresenterFactory.build_for(ids: [@work.id], presenter_class: Hyrax::WorkShowPresenter, presenter_args: @current_ability).first
+        presenter.solr_document.export_as_oai_dc_xml
       end
   
       def write_dc_xml
         @dc_xml = extract_dc_xml read_oai_dc_xml
         File.open(File.join(pre_bag_work_path, 'dc.xml'), "w:UTF-8") do |f|
-            f.write(@dc_xml)
+            f.write "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n#{@dc_xml.to_s}\n"
         end
       end
   

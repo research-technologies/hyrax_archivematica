@@ -5,6 +5,7 @@ require_dependency "hyrax_archivematica/application_controller"
 module HyraxArchivematica
   class ArchivesController < ApplicationController
     include Hyrax::ThemedLayoutController
+    include HyraxArchivematica::ArchiveRecordBehaviour
     before_action :authenticate_user!
 #    before_action :set_exporter, only: [:show, :edit, :update, :destroy]
     with_themed_layout 'dashboard'
@@ -21,10 +22,8 @@ module HyraxArchivematica
     end
 
     def new
-#      add_breadcrumb t(:'hyrax.controls.home'), root_path
-#      add_breadcrumb t(:'hyrax.dashboard.breadcrumbs.admin'), hyrax.dashboard_path
-#      add_breadcrumb t(:'hyrax.archives.new.header'), hyrax.new_work_archive_path
-      @work = Hyrax::WorkRelation.new.find(params[:id])
+      HyraxArchivematica::ArchiveWorkflowManager.new(params: {user: current_user, work_id: params[:id], force: true})
+      redirect_to hyrax_archivematica.work_archives_path, notice: "New archive process started"
     end
 
     def create
@@ -38,12 +37,12 @@ module HyraxArchivematica
     end
 
     def index
-       STDERR.puts "############# I is in the index #{view_context}"
-       load_archive_record
-#      add_breadcrumb t(:'hyrax.controls.home'), root_path
-#      add_breadcrumb t(:'hyrax.dashboard.breadcrumbs.admin'), hyrax.dashboard_path
-#      add_breadcrumb t(:'hyrax.admin.sidebar.archives'), hyrax.archives_path
-#      @presenter = ArchivesPresenter.new(current_user, view_context)
+      @archive_records = archive_records(params[:id])
+      @work = Hyrax::WorkRelation.new.find(params[:id])
+      add_breadcrumb t(:'hyrax.controls.home'), main_app.root_path
+      add_breadcrumb t(:'hyrax.dashboard.breadcrumbs.admin'), hyrax.dashboard_path
+      add_breadcrumb @work.to_s, main_app.polymorphic_path(@work) 
+      add_breadcrumb t(:'hyrax.dashboard.work.archives'), hyrax_archivematica.work_archives_path
     end
 
     private

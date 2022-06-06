@@ -1,18 +1,16 @@
 # frozen_string_literal: true
-#require_dependency "hyrax_archivematica/app/jobs/hyrax_archivematica_job_behaviour"
 
 module HyraxArchivematica
   # Assesses a work for readiness and changes before outputing 
   # NEW_AIP or UPDATE_AIP (or stops the workflow) accordingly
-  class AssessForArchivingJob < Gush::Job
-    include HyraxArchivematica::HyraxArchivematicaJobBehaviour
+  class AssessForArchivingJob < BaseJob
+    include HyraxArchivematica::ArchiveRecordBehaviour
   
     # @param [String] work_id - the work id
     # @param [String] file_set_id - the ile_set_ids
     def perform
-
       work = ActiveFedora::Base.find(params[:work_id]) unless params[:work_id].blank?
-  
+      force = params[:force] || false
       # If we are triggered by a file_set removal, we have nothing but the file_set_id to go on
       # We use this (and hope) that theres an archive_record and get the parent work if from that (!?)
       if work.nil? && params[:file_set_id].present?
@@ -20,12 +18,14 @@ module HyraxArchivematica
          work = ActiveFedora::Base.find(ar.work_id) unless ar.nil?
       end
       
+      raise ActiveFedora::ObjectNotFoundError if work.blank?
+
       # Some instance variables
       @work = work 
       raise ActiveFedora::ObjectNotFoundError if @work.file_sets.empty? # Refuse to archive work which has no files"
-      @archive_record = latest_archive_records(@work.id).first_or_create
+      @archive_record = active_archive_records(@work.id).first_or_create # Create an AR if there is not already an active one
 
-      if files_change? 
+      if files_change? || force
         output({new_aip: true, update_aip: false, archive_record_id: @archive_record.id})
       elsif metadata_change? && ! files_change? #metadata only change
         output({new_aip: false, update_aip: true, archive_record_id: @archive_record.id})

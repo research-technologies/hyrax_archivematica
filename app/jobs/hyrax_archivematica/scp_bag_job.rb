@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 require 'net/ssh'
 require 'net/scp'
-#require_dependency "hyrax_archivematica/app/jobs/hyrax_archivematica_job_behaviour"
 
 module HyraxArchivematica
   # Converts UploadedFiles into FileSets and attaches them to works.
-  class ScpBagJob < Gush::Job
-    include HyraxArchivematica::HyraxArchivematicaJobBehaviour
+  class ScpBagJob < BaseJob
+    include HyraxArchivematica::ArchiveRecordBehaviour
 
     def perform
       prev_job_output = payloads.first[:output]
@@ -19,18 +18,6 @@ module HyraxArchivematica
         @archive_record.update_attributes({archive_status: HyraxArchivematica::Constants::STATUS_TRANSFER_NOT_VERIFIED})       
         self.fail!
       end
-    end
-
-    def bag_path
-      @archive_record.bag_path
-    end
-
-    def bag_zip
-      File.basename(bag_path)
-    end
-
-    def bag_hash
-      @archive_record.bag_hash
     end
 
     def ssh_private_keys
@@ -50,10 +37,8 @@ module HyraxArchivematica
         # that something vague has gone wrong with verification
         remote_bag_hash = ssh.exec!("md5sum #{am_transfer_source_dir}/#{bag_zip} 2> /dev/null | awk '{print $1}'").chomp
         if remote_bag_hash.blank?
-          STDERR.puts "############# could not verify the transferred file due to some issue on the host"
           return false
         end
-        STDERR.puts "############# *#{remote_bag_hash}*  <=====> *#{bag_hash}*"
         remote_bag_hash.eql? bag_hash
       end
     end

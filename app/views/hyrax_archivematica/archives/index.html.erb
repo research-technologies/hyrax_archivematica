@@ -1,8 +1,68 @@
 <% provide :page_header do %>
-  <h1><span class="fa fa-cloud-download" aria-hidden="true"></span> Archives</h1>
+  <h1><span class="fa fa-archive" aria-hidden="true"></span> Archive records for <%= @work[:title].first %></h1>
   <div class="pull-right">
     <%= link_to new_work_archive_path, class: 'btn btn-primary' do %>
-      <span class="fa fa-edit" aria-hidden="true"></span> <%= t(:'helpers.action.archive.new') %>
+      <span class="fa fa-lock" aria-hidden="true"></span> <%= t(:'helpers.action.archive.archive_item') %>
     <% end %>
   </div>
 <% end %>
+
+
+<div class="panel panel-default">
+  <div class="panel-body">
+    <% if @archive_records.present? %>
+      <div class="table-responsive">
+        <table class="table table-striped datatable">
+          <thead>
+            <tr>
+              <th scope="col">Record ID</th>
+              <th scope="col">Status</th>
+              <th scope="col">Record created</th>
+              <th scope="col">Record updated</th>
+              <th scope="col">Files</th>
+              <th scope="col">Files checksum</th>
+              <th scope="col">Metadata checksum</th>
+              <th scope="col">Transfer UUID</th>
+              <th scope="col">Ingest UUID</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @archive_records.each do |archive_record| %>
+              <tr>
+                <th scope="row"><%= archive_record.id %></th>
+                <td><%= t("hyrax_archivematica.#{archive_record.archive_status}") %></td>
+                <td><%= archive_record.created_at %></td>
+                <td><%= archive_record.updated_at %></td>
+                <td><%= archive_record.file_set_ids %></td>
+                <td><%= archive_record.files_hash.truncate(16) %></td>
+                <td><%= archive_record.metadata_hash.truncate(16) %></td>
+                <td><%= archive_record.transfer_uuid %></td>
+                <td><%= archive_record.ingest_uuid %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <% else %>
+        <p>No archives of this work have been created.</p>
+      <% end %>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('#DataTables_Table_0').DataTable({
+      destroy: true, /* Reinitialize DataTable with config below */
+      'columnDefs': [
+          { 'orderable': true, 'targets': [0, 1, 2] },
+          { 'orderable': false, 'targets': [3, 4, 5, 6] }
+      ],
+      'language': {
+        'info': 'Showing _START_ to _END_ of _TOTAL_ archive_records',
+        'infoEmpty': 'No archive records to show',
+        'infoFiltered': '(filtered from _MAX_ total archive_records)',
+        'lengthMenu': 'Show _MENU_ archive_records'
+      }
+    })
+  })
+</script>
