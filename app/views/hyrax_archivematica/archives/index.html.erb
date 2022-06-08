@@ -1,5 +1,5 @@
 <% provide :page_header do %>
-  <h1><span class="fa fa-archive" aria-hidden="true"></span> Archive records for <%= @work[:title].first %></h1>
+  <h1><span class="fa fa-archive" aria-hidden="true"></span> <%= t('hyrax_archivematica.dashboard.work.title')%> <%= @work[:title].first %></h1>
   <div class="pull-right">
     <%= link_to new_work_archive_path, class: 'btn btn-primary' do %>
       <span class="fa fa-lock" aria-hidden="true"></span> <%= t(:'helpers.action.archive.archive_item') %>
@@ -15,29 +15,31 @@
         <table class="table table-striped datatable">
           <thead>
             <tr>
-              <th scope="col">Record ID</th>
-              <th scope="col">Status</th>
-              <th scope="col">Record created</th>
-              <th scope="col">Record updated</th>
-              <th scope="col">Files</th>
-              <th scope="col">Files checksum</th>
-              <th scope="col">Metadata checksum</th>
-              <th scope="col">Transfer UUID</th>
-              <th scope="col">Ingest UUID</th>
+              <th scope="col"><%= t('hyrax_archivematica.id') %></th>
+              <td scope="col" class="nosort"></td>
+              <th scope="col"><%= t('hyrax_archivematica.status') %></th>
+              <th scope="col"><%= t('hyrax_archivematica.created') %></th>
+              <th scope="col"><%= t('hyrax_archivematica.updated') %></th>
+              <th scope="col"><%= t('hyrax_archivematica.files') %></th>
+              <th scope="col"><%= t('hyrax_archivematica.files_checksum') %></th>
+              <th scope="col"><%= t('hyrax_archivematica.metadata_checksum') %></th>
+              <th scope="col"><%= t('hyrax_archivematica.transfer_uuid') %></th>
+              <th scope="col"><%= t('hyrax_archivematica.ingest_uuid') %></th>
             </tr>
           </thead>
           <tbody>
             <% @archive_records.each do |archive_record| %>
               <tr>
                 <th scope="row"><%= archive_record.id %></th>
-                <td><%= t("hyrax_archivematica.#{archive_record.archive_status}") %></td>
+                <td class="ha <%= "ha_#{archive_record.archive_status}" %>"><span class="fa fa-lock" aria-hidden="true"></span></td>
+                <td class="ha <%= "ha_#{archive_record.archive_status}" %>"><%= t("hyrax_archivematica.#{archive_record.archive_status}") %></td>
                 <td><%= archive_record.created_at %></td>
                 <td><%= archive_record.updated_at %></td>
                 <td><%= archive_record.file_set_ids %></td>
                 <td><%= archive_record.files_hash.truncate(16) %></td>
                 <td><%= archive_record.metadata_hash.truncate(16) %></td>
                 <td><%= archive_record.transfer_uuid %></td>
-                <td><%= archive_record.ingest_uuid %></td>
+                <td><%= aip_url archive_record %></td>
               </tr>
             <% end %>
           </tbody>
@@ -50,18 +52,17 @@
 </div>
 
 <script>
-  $(function() {
-    $('#DataTables_Table_0').DataTable({
-      destroy: true, /* Reinitialize DataTable with config below */
+$(document).ready(function() {
+    $('.datatable').DataTable({
+      destroy: true,
       'columnDefs': [
-          { 'orderable': true, 'targets': [0, 1, 2] },
-          { 'orderable': false, 'targets': [3, 4, 5, 6] }
+          { 'orderable': false, 'targets': [1, 5, 6, 7, 8, 9] }
       ],
       'language': {
-        'info': 'Showing _START_ to _END_ of _TOTAL_ archive_records',
+        'info': 'Showing _START_ to _END_ of _TOTAL_ archive records',
         'infoEmpty': 'No archive records to show',
-        'infoFiltered': '(filtered from _MAX_ total archive_records)',
-        'lengthMenu': 'Show _MENU_ archive_records'
+        'infoFiltered': '(filtered from _MAX_ total archive records)',
+        'lengthMenu': 'Show _MENU_ archive records'
       }
     })
   })

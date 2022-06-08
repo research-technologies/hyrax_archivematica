@@ -1,0 +1,23 @@
+td.ha { vertical-align: middle !important }
+.ha_am_ingest_succeeded,
+.ha_archive_complete { color: #008000; }
+
+.ha_archive_initialised,
+.ha_bag_created,
+.ha_transferred_to_transfer_source {color: #000;}
+
+.ha_am_transfer_started,
+.ha_am_transfer_in_progress,
+.ha_am_transfer_waiting,
+.ha_am_transfer_succeeded,
+.ha_am_approval_succeeded,
+.ha_am_ingest_started,
+.ha_am_ingest_in_progress,
+.ha_am_ingest_waiting {color: #FFBF00;}
+
+.ha_am_transfer_failed,
+.ha_am_approval_failed,
+.ha_am_ingest_failed,
+.ha_transfer_to_transfer_source_failed,
+.ha_error {color: #FF0000;}
+

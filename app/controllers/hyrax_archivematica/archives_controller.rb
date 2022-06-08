@@ -42,7 +42,7 @@ module HyraxArchivematica
       add_breadcrumb t(:'hyrax.controls.home'), main_app.root_path
       add_breadcrumb t(:'hyrax.dashboard.breadcrumbs.admin'), hyrax.dashboard_path
       add_breadcrumb @work.to_s, main_app.polymorphic_path(@work) 
-      add_breadcrumb t(:'hyrax.dashboard.work.archives'), hyrax_archivematica.work_archives_path
+      add_breadcrumb t(:'hyrax_archivematica.dashboard.work.archives'), hyrax_archivematica.work_archives_path
     end
 
     private

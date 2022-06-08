@@ -47,7 +47,7 @@
     <% if can? :archive, document.id %>
       <li role="menuitem" tabindex="-1">
         <%= link_to(hyrax_archivematica.work_archives_path(document.id), class: 'itemicon itemarchive', title: t("hyrax.dashboard.my.action.archive")) do %>
-          <i class="glyphicon glyphicon-archive" aria-hidden="true"></i>
+          <i class="glyphicon glyphicon-lock" aria-hidden="true"></i>
           <span> <%= t("hyrax.dashboard.my.action.archive") %> </span>
         <% end %>
       </li>

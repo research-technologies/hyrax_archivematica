@@ -28,15 +28,8 @@ module HyraxArchivematica
   
       def update_aip
         STDERR.puts "#################### Change to metadata only detected : attempt to update AIP ?? #################"
-#        write_files
-#        write_metadata
-#        build_bag
-#        @bag_zip = build_zip
-#        @archive_record.update_attributes({bag_path: @bag_zip,
-#                                           bag_hash: calculate_bag_hash, 
-#                                           archive_status: HyraxArchivematica::Constants::STATUS_BAG_CREATED})
-#        cleanup_pre_bag_work_path
-#        cleanup_transfer_work_path
+        STDERR.puts "#################### don't think a reingest will help as changed metadata is part of package, so new AIP required until I find out otherwise..."
+        create_bag
       end
 
       def create_bag
@@ -126,7 +119,6 @@ module HyraxArchivematica
       def transfer_path
         HyraxArchivematica.transfer_path
       end
-  
    
       def oai_dc_xml_url
         #/catalog/oai?verb=GetRecord&metadataPrefix=oai_dc&identifier=oai:hyrax:p8418n20k

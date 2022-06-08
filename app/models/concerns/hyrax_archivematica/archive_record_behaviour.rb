@@ -50,7 +50,6 @@ module HyraxArchivematica
       @archive_record.bag_hash
     end
 
-
     #TODO find a suitable home for this stuff
     def am_host
       HyraxArchivematica.am_host
@@ -71,7 +70,6 @@ module HyraxArchivematica
     def am_transfer_source_dir
       HyraxArchivematica.am_transfer_source_dir
     end
-
 
   end
 end
