@@ -48,3 +48,20 @@ require 'hyrax_archivematica/app/actors/hyrax/actors/hyrax_archivematica_actor'
 Hyrax.config do | config |
   Hyrax::CurationConcern.actor_factory.insert_before Hyrax::Actors::CreateWithFilesActor, Hyrax::Actors::HyraxArchivematicaActor
 end
+
+# Monkey patch the ordered member actor to publish a message when _all_ the files have been attached
+# If you look above you'll see where we subscribe to that message
+# Overrides Hyrax v3.3.0
+Hyrax::Actors::OrderedMembersActor.class_eval do
+  def attach_ordered_members_to_work(work)
+    acquire_lock_for(work.id) do
+      work.ordered_members = ordered_members
+      work.save
+      ordered_members.each do |file_set|
+        Hyrax.config.callback.run(:after_create_fileset, file_set, user, warn: false)
+      end
+    end
+    # Run this call back so that we can publish the message that _all_ filesets have been attached
+    Hyrax.config.callback.run(:after_attach_filesets, work, user, warn: false)
+  end
+end

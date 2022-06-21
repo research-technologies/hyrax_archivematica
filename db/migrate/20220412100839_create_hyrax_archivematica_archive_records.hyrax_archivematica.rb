@@ -9,6 +9,7 @@ class CreateHyraxArchivematicaArchiveRecords < ActiveRecord::Migration[5.2]
       t.string :metadata_hash
       t.string :files_hash
       t.string :bag_hash
+      t.string :bag_path
       t.text :file_set_ids
 
       t.timestamps

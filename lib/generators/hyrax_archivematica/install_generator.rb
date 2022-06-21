@@ -25,7 +25,7 @@ class HyraxArchivematica::InstallGenerator < Rails::Generators::Base
   end
 
   def mount_route
-    route "mount HyraxArchivematica::Engine, at: '/'"
+    route "  mount HyraxArchivematica::Engine, at: '/'"
   end
 
   def create_config
@@ -37,6 +37,15 @@ class HyraxArchivematica::InstallGenerator < Rails::Generators::Base
     unless File.read('app/helpers/hyrax_helper.rb').include? helper
       inject_into_file 'app/helpers/hyrax_helper.rb', after: "Hyrax::HyraxHelperBehavior\n" do
         "#{helper}\n"
+      end
+    end
+  end
+
+  def add_queue
+    queue = '  - archive #added by hyrax_archivematica:install'
+    unless File.read('config/sidekiq.yml').include? queue
+      inject_into_file 'config/sidekiq.yml', after: "  - default\n" do
+        "#{queue}\n"
       end
     end
   end
