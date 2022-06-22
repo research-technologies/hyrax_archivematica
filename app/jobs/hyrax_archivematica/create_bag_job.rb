@@ -91,21 +91,18 @@ module HyraxArchivematica
   
       def build_bag
         # TODO bulkrax does not yet have a bagit exporter, but when it does we should check for it and use it rather than having to do our own    
-        WillowSword::BagPackage.new(pre_bag_work_path, transfer_work_path)
+        FileUtils.mkdir_p(transfer_work_path(@work.id))
+        WillowSword::BagPackage.new(pre_bag_work_path, transfer_work_path(@work.id))
       end
   
       def build_zip
         # Maybe remove condition if we have problem with zips updating, but WS will error if it finds a zip file in place...
-        WillowSword::ZipPackage.new(transfer_work_path, bag_zip_path).create_zip unless File.exist?(bag_zip_path) 
+        WillowSword::ZipPackage.new(transfer_work_path(@work.id), bag_zip_path).create_zip unless File.exist?(bag_zip_path) 
         bag_zip_path
       end
 
-      def transfer_work_path
-        File.join(transfer_path,@work.id.to_s)
-      end
-  
       def bag_zip_path
-        @bag_zip_path ||= "#{transfer_work_path}_#{Time.now.to_i}.zip"
+        @bag_zip_path ||= "#{transfer_work_path(@work.id)}_#{Time.now.to_i}.zip"
       end
 
       def calculate_bag_hash
@@ -166,13 +163,8 @@ module HyraxArchivematica
       end
   
       def cleanup_transfer_work_path
-        # Obvs we won't really remove the bagit zip file at this point!
-        FileUtils.rm_r(transfer_work_path) if Dir.exist?(transfer_work_path)
+        FileUtils.rm_r(transfer_work_path(@work.id)) if Dir.exist?(transfer_work_path(@work.id))
       end
   
-      def cleanup_transfer_zip
-        FileUtils.rm("#{transfer_work_path}.zip") if File.exist?("#{transfer_work_path}.zip")
-      end
-
   end
 end

@@ -12,6 +12,7 @@ module HyraxArchivematica
       @archive_record = ArchiveRecord.find(prev_job_output[:archive_record_id]) 
       transfer_bag
       if verify_transfer
+        cleanup_transfer_zip     
         @archive_record.update_attributes({archive_status: HyraxArchivematica::Constants::STATUS_TRANSFER_VERIFIED})
         output({archive_record_id: @archive_record.id})
       else
@@ -43,6 +44,9 @@ module HyraxArchivematica
       end
     end
 
+    def cleanup_transfer_zip
+      FileUtils.rm("#{transfer_work_path  @work.id}.zip") if File.exist?("#{transfer_work_path @work.id}.zip")
+    end
 
   end
 end

@@ -71,5 +71,9 @@ module HyraxArchivematica
       HyraxArchivematica.am_transfer_source_dir
     end
 
+    def transfer_work_path(work_id)
+      File.join(transfer_path,work_id.to_s)
+    end
+  
   end
 end
