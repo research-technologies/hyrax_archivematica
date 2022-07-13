@@ -19,11 +19,18 @@ module HyraxArchivematica
   
     def perform(workflow_id, params)
       @flow = HyraxArchivematica::ArchiveWorkflow.find(workflow_id)
-      @archive_record = ArchiveRecord.find(archive_record_id)
       @params = params
-      return if done?
-      continue if retry?
-      retry_later if retry? or flow.running?
+      ar_id = archive_record_id
+      if ar_id.present?
+        @archive_record = ArchiveRecord.find(ar_id)
+        return if done?
+        continue if retry?
+        retry_later if retry? or flow.running?
+      else
+        # ArchiveRecord doesn't exist yet (maybe a big file(s) to attach)
+        # let's come back in a minute
+        retry_later
+      end
     end
   
     # Continue a failed transfer
@@ -78,14 +85,16 @@ module HyraxArchivematica
         next unless job.output_payload
         next unless job.output_payload[:archive_record_id]
         job.output_payload[:archive_record_id]
-      end.compact!.first
+      end.first
     end
 
-    # Schedule a new job to start after 15 minutes
+    # Schedule a new job to start after 1 minute
     #  @todo consider whether we should limit the number of retries
     #    if so, this method could raise an error and use Sidekiq's retry functionality instead
     def retry_later
-      HyraxArchivematica::ArchiveWorkflowMonitorJob.set(wait: 15.minutes).perform_later(flow.id, @params)
+#      HyraxArchivematica::ArchiveWorkflowMonitorJob.set(wait: 1.minute).perform_later(flow.id, @params)
+      # Using sidekiq to manage retries as suggested above. A bit messy in the logs, but means we avoid infinity attempts
+      raise "This is not an error, but a deliberate retry of the Archive Workflow Monitor Job. We will try this again until we detect archive success or sidekiq gently puts it to rest."
     end
   
     def inform_user
@@ -108,7 +117,6 @@ module HyraxArchivematica
         Details of the job can be viewed at #{ENV['SERVER_URL']}/ingests/#{flow.id}"
         @archive_record.update_attributes({archive_status: HyraxArchivematica::Constants::STATUS_ERROR})
       end
-           # Box::InformUserJob.perform_later(u_params)
     end
   end
 end
