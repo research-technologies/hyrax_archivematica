@@ -27,8 +27,10 @@ module HyraxArchivematica
     private
   
       def update_aip
-        STDERR.puts "#################### Change to metadata only detected : attempt to update AIP ?? #################"
-        STDERR.puts "#################### don't think a reingest will help as changed metadata is part of package, so new AIP required until I find out otherwise..."
+        # Change to metadata only detected : attempt to update AIP ??
+        # Actually we don't think a reingest will help as changed metadata is 
+        # part of package, so new AIP required until we find out otherwise...
+        # So this is synonymous to create_bag...
         create_bag
       end
 
@@ -51,7 +53,7 @@ module HyraxArchivematica
           FileUtils.mkdir_p(path)
           file = filename(fs)
           require 'open-uri'
-          io = URI.open(fs.original_file.uri)
+          io = URI.open(fs.original_file.uri, "rb")
           next if file.blank?
           File.open(File.join(path, file), 'wb') do |f|
             f.write(io.read)
@@ -109,14 +111,6 @@ module HyraxArchivematica
         @bag_hash ||= calculate_md5 @bag_zip
       end
   
-      def bagit_export_path
-        HyraxArchivematica.bagit_export_path
-      end
-  
-      def transfer_path
-        HyraxArchivematica.transfer_path
-      end
-   
       def oai_dc_xml_url
         #/catalog/oai?verb=GetRecord&metadataPrefix=oai_dc&identifier=oai:hyrax:p8418n20k
         url = CatalogController.blacklight_config.oai[:provider][:repository_url]

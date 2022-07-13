@@ -25,7 +25,7 @@
           act_on_ok
         else
           #Rails.logger.error("Base Job failed with: #{message_text}")
-          STDERR.puts "####### Base Job failed with: #{message_text}"
+          STDERR.puts "Base Job failed with: #{message_text}"
           output(event: 'failed', message: message_text)
           fail!
         end

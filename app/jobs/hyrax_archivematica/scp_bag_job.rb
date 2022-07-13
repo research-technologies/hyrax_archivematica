@@ -10,6 +10,7 @@ module HyraxArchivematica
     def perform
       prev_job_output = payloads.first[:output]
       @archive_record = ArchiveRecord.find(prev_job_output[:archive_record_id]) 
+      @work = ActiveFedora::Base.find(@archive_record.work_id) 
       transfer_bag
       if verify_transfer
         cleanup_transfer_zip     

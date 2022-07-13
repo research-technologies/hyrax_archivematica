@@ -15,8 +15,6 @@ module HyraxArchivematica
         #ArchiveWorkflow.new(event[:object])# we only want to listen to this pub if it is sidekiq that is publishing it
         if Sidekiq.server? 
           HyraxArchivematica::ArchiveWorkflowManager.new(params: {user: event[:user], work_id: event[:object].id})
-#          flow = HyraxArchivematica::ArchiveWorkflow.create(event[:user],event[:object].id)
-#          flow.start!
         end
       end
 
@@ -35,8 +33,6 @@ module HyraxArchivematica
           #
           # NB this will only work if the work has already been archived and there exists an ArchiveRecord with the fileset list
           HyraxArchivematica::ArchiveWorkflowManager.new(params: {user: event[:user], file_set_id: event[:id]})
-#          flow = HyraxArchivematica::ArchiveWorkflow.create(event[:user],nil,event[:id])
-#          flow.start!
         else
            # Not sure we get here and if we do, not sure we really want to start an archive job
            # That would archive a work that has just been deleted... which defeats the object 
