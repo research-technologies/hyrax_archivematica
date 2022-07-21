@@ -23,13 +23,23 @@ module HyraxArchivematica
       # Some instance variables
       @work = work 
       raise ActiveFedora::ObjectNotFoundError if @work.file_sets.empty? # Refuse to archive work which has no files"
+
+      #####################
+      # TODO we need to compare the new archive record with the previous one... not the new (in only) OR last archive record with whatever is now !?
+      #####################
+      # Get the latest existing AR
+      @prev_archive_record = archive_records(@work.id)&.first
+      # Find the latest NOT COMPLETE AR, if there is not one we will create a new empty AR
       @archive_record = active_archive_records(@work.id).first_or_create # Create an AR if there is not already an active one
+      # If there was no previous AR, we will make the new one the previous one this will allow us to compare the current state against something (albeit a mostly empty AR)
+      @prev_archive_record = @archive_record if @prev_archive_record.blank? 
 
       if files_change? || force
         output({new_aip: true, update_aip: false, archive_record_id: @archive_record.id})
       elsif metadata_change? && ! files_change? #metadata only change
         output({new_aip: false, update_aip: true, archive_record_id: @archive_record.id})
       else #no significant change, stop the workflow... should we destroy the ArchiveRecord here too?
+        @archive_record.destroy!
         self.fail!
         return 
       end
@@ -66,11 +76,11 @@ module HyraxArchivematica
       end
   
       def metadata_change?
-        @archive_record.metadata_hash != metadata_hash
+        @prev_archive_record.metadata_hash != metadata_hash
       end
   
       def files_change?
-        @archive_record.files_hash != files_hash
+        @prev_archive_record.files_hash != files_hash
       end
   
   end

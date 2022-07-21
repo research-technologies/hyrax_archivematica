@@ -29,6 +29,7 @@ module HyraxArchivematica
       else
         # ArchiveRecord doesn't exist yet (maybe a big file(s) to attach)
         # let's come back in a minute
+        STDERR.puts "#### Archive Record does not exist, this may happen early on or for bigger objects, but should not persist"
         retry_later
       end
     end
@@ -81,11 +82,11 @@ module HyraxArchivematica
     
     # @return String a single archive_record_id from the jobs that have finished and have that in their output (should be all of them)
     def archive_record_id
-      flow.jobs.collect do |job|
+      archive_ids = flow.jobs.collect do |job|
         next unless job.output_payload
         next unless job.output_payload[:archive_record_id]
         job.output_payload[:archive_record_id]
-      end.first
+      end&.reject(&:blank?)&.first
     end
 
     # Schedule a new job to start after 1 minute
